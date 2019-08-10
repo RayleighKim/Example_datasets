@@ -9,6 +9,14 @@ ATTRS_NAME = "lfw_attributes.txt"  # http://www.cs.columbia.edu/CAVE/databases/p
 IMAGES_NAME = "lfw-deepfunneled.tgz"  # http://vis-www.cs.umass.edu/lfw/lfw-deepfunneled.tgz
 RAW_IMAGES_NAME = "lfw.tgz"  # http://vis-www.cs.umass.edu/lfw/lfw.tgz
 
+def use_simple_tqdm():
+    try:
+        import google.colab
+        import os
+        return not bool(int(os.environ.get("EXPERIMENTAL_TQDM", "0")))
+    except ImportError:
+        return False
+
 def tqdm_notebook_failsafe(*args, **kwargs):
     if use_simple_tqdm():
         # tqdm is broken on Google Colab
