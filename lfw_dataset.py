@@ -3,13 +3,18 @@ import os
 import cv2
 import pandas as pd
 import tarfile
-import tqdm_utils
-
+import tqdm
 
 ATTRS_NAME = "lfw_attributes.txt"  # http://www.cs.columbia.edu/CAVE/databases/pubfig/download/lfw_attributes.txt
 IMAGES_NAME = "lfw-deepfunneled.tgz"  # http://vis-www.cs.umass.edu/lfw/lfw-deepfunneled.tgz
 RAW_IMAGES_NAME = "lfw.tgz"  # http://vis-www.cs.umass.edu/lfw/lfw.tgz
 
+def tqdm_notebook_failsafe(*args, **kwargs):
+    if use_simple_tqdm():
+        # tqdm is broken on Google Colab
+        return SimpleTqdm(*args, **kwargs)
+    else:
+        return tqdm.tqdm_notebook(*args, **kwargs)
 
 def decode_image_from_raw_bytes(raw_bytes):
     img = cv2.imdecode(np.asarray(bytearray(raw_bytes), dtype=np.uint8), 1)
@@ -33,7 +38,7 @@ def load_lfw_dataset(
     photo_ids = []
 
     with tarfile.open(RAW_IMAGES_NAME if use_raw else IMAGES_NAME) as f:
-        for m in tqdm_utils.tqdm_notebook_failsafe(f.getmembers()):
+        for m in tqdm_notebook_failsafe(f.getmembers()):
             if m.isfile() and m.name.endswith(".jpg"):
                 # prepare image
                 img = decode_image_from_raw_bytes(f.extractfile(m).read())
